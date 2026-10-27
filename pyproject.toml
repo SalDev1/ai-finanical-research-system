@@ -1,0 +1,10 @@
+[project]
+name = "financial-research-system"
+version = "0.1.0"
+description = "Financial research system"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "SQLAlchemy>=2.0,<3.0",
+    "psycopg[binary]>=3.1,<4.0",
+]
