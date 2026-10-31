@@ -1,12 +1,9 @@
-"""Research job routes."""
-
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Depends, status
-from pydantic import BaseModel, Field
 from app.db.session import get_db
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.research import (
     ResearchRequest,
@@ -15,14 +12,16 @@ from app.schemas.research import (
 )
 from app.services.research_service import ResearchService
 
-router = APIRouter(prefix="/api/v1/research", tags=["Research"])
+router = APIRouter(prefix="/v1/research", tags=["Research"])
 
 @router.post("", response_model=ResearchResponse ,status_code=status.HTTP_202_ACCEPTED)
-def create_research(request: ResearchRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
+async def create_research(request: ResearchRequest, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """Create a research job."""
     service = ResearchService(db)
 
-    job = service.create_research(request)
+    job = await service.create_research(request)
+
+    print(f"New Job : {job}")
 
     return ResearchResponse(
         research_id = job.id,
@@ -32,7 +31,7 @@ def create_research(request: ResearchRequest, db: Session = Depends(get_db)) -> 
 
 
 @router.get("/{research_id}")
-def get_research(research_id: UUID, db: Session = Depends(get_db)) -> dict[str, Any]:
+def get_research(research_id: UUID, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """Get research status and progress."""
     service = ResearchService(db)
 

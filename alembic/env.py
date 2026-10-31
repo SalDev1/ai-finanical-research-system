@@ -7,8 +7,8 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import settings
-from app.db.session import Base
-# import app.models  # Register models with Base.metadata
+from app.db.models import Base
+import app.db.models  # Register all models with Base.metadata.
 
 config = context.config
 
@@ -29,6 +29,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,
     )
 
     with context.begin_transaction():

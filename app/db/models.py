@@ -1,5 +1,4 @@
 """Database models."""
-
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
@@ -16,12 +15,9 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Uuid
-
-
-class Base(DeclarativeBase):
-    """Base class for SQLAlchemy models."""
+from app.db.session import Base
 
 class ResearchJob(Base):
     """A persisted financial research job and its execution state."""

@@ -1,32 +1,28 @@
-"""Database session configuration."""
-# This piece of code helps in connecting Python to PostgresDB by creating a session with the database.
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
-    async_sessionmaker,
     create_async_engine,
-)
+    async_sessionmaker,
+    AsyncSession
+) 
 from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
-from collections.abc import Generator
 
+# Creates an asynchronous database engine.
 engine = create_async_engine(
     settings.database_url,
-    pool_pre_ping=True,
+    echo=True,  # print SQL queries in your terminal, which is useful for debugging.
+    pool_pre_ping=True   # Helps detect stale database connections.
 )
 
+# Creates an asynchronous database sessions.
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
-    expire_on_commit=False,
+    class_=AsyncSession,
+    expire_on_commit=False
 )
-
-#  Assigning a Shared Base for all models.
 class Base(AsyncAttrs, DeclarativeBase):
     pass
 
-def get_db() -> Generator:
-    """Get a database session."""
-    db = AsyncSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

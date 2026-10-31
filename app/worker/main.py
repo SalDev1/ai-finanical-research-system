@@ -23,7 +23,7 @@ def run_worker():
             research_id = None
 
         finally:
-            db.close()
+            db.aclose()
 
         if research_id is None:
             time.sleep(3)

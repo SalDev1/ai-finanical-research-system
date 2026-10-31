@@ -1,5 +1,5 @@
 """Research service."""
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.research_repository import (
     ResearchRepository
@@ -7,19 +7,21 @@ from app.repositories.research_repository import (
 
 class ResearchService:
     # The service is responsible for coordinating the application logic.
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
         self.repository = ResearchRepository(db)
 
-    def create_research(self, request):
+    async def create_research(self, request):
         payload = request.model_dump(mode="json")
-        job = self.repository.create(payload);
+        print(f"Payload Dump : {payload}")
+        job = await self.repository.create(payload)
         """Create a new research job."""
+        print(f"Research job created in DB : {job.id} and status: {job.status}")
         return job
 
-    def get_research(self, research_id):
+    async def get_research(self, research_id):
         """Get a research job by its ID."""
-        job = self.repository.get_by_id(research_id)
+        job = await self.repository.get_by_id(research_id)
         if not job: 
             return None
         return job

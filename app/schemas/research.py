@@ -2,7 +2,6 @@
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
-
 from pydantic import BaseModel, Field
 
 class ResearchRequest(BaseModel):
@@ -14,13 +13,12 @@ class ResearchRequest(BaseModel):
 
 
 class ResearchResponse(BaseModel):
-    research_id: int 
+    research_id: UUID 
     status: str
     message: str
 
-
 class ResearchStatusResponse(BaseModel):
-    research_id: int
+    research_id: UUID
     status: str
     current_stage: str
     created_at: datetime
