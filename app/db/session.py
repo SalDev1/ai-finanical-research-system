@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
+from collections.abc import Generator
 
 engine = create_async_engine(
     settings.database_url,
@@ -21,3 +22,11 @@ AsyncSessionLocal = async_sessionmaker(
 #  Assigning a Shared Base for all models.
 class Base(AsyncAttrs, DeclarativeBase):
     pass
+
+def get_db() -> Generator:
+    """Get a database session."""
+    db = AsyncSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

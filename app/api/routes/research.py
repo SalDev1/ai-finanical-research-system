@@ -3,35 +3,53 @@
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, Field
+from app.db.session import get_db
+from sqlalchemy.orm import Session
 
+from app.schemas.research import (
+    ResearchRequest,
+    ResearchResponse,
+    ResearchStatusResponse,
+)
+from app.services.research_service import ResearchService
 
-router = APIRouter(prefix="/research", tags=["research"])
+router = APIRouter(prefix="/api/v1/research", tags=["Research"])
 
-
-class ResearchRequest(BaseModel):
-    """Validated requirements used to create a research job."""
-
-    requirements: dict[str, Any] = Field(default_factory=dict)
-
-
-@router.post("", status_code=status.HTTP_202_ACCEPTED)
-def create_research(request: ResearchRequest) -> dict[str, Any]:
+@router.post("", response_model=ResearchResponse ,status_code=status.HTTP_202_ACCEPTED)
+def create_research(request: ResearchRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Create a research job."""
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Research job creation is not implemented yet",
+    service = ResearchService(db)
+
+    job = service.create_research(request)
+
+    return ResearchResponse(
+        research_id = job.id,
+        status = job.status,
+        message = "Research request sucessfully queued."
     )
 
 
 @router.get("/{research_id}")
-def get_research(research_id: UUID) -> dict[str, Any]:
+def get_research(research_id: UUID, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Get research status and progress."""
+    service = ResearchService(db)
 
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail=f"Research status lookup is not implemented for {research_id}",
+    job = service.get_research(research_id)
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Research job not found for {research_id}"
+        )
+
+    return ResearchStatusResponse(
+        research_id=job.id,
+        status=job.status,
+        current_stage=job.current_stage,
+        created_at=job.created_at,
+        updated_at=job.updated_at
     )
 
 

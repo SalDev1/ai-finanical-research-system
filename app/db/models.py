@@ -23,7 +23,7 @@ from sqlalchemy.types import Uuid
 class Base(DeclarativeBase):
     """Base class for SQLAlchemy models."""
 
-class ResearchJobs(Base):
+class ResearchJob(Base):
     """A persisted financial research job and its execution state."""
 
     __tablename__ = "research_jobs"
@@ -65,13 +65,31 @@ class ResearchJobs(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    attempt_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+    max_attempts: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=3
+    )
+    worker_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True
+    )
+    error_message: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
 
 
 class ResearchTasks(Base):
     # Store individual tasks within each research jobs. 
     __tablename__ = "research_tasks"
     id : Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
-    research_id : Mapped[UUID] = mapped_column(Uuid(as_uuid=True), nullable=False, foreign_key="research_jobs.id")
+    research_id : Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("research_jobs.id"), nullable=False)
     task_key: Mapped[str] = mapped_column(String, nullable=False)
     task_type: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
