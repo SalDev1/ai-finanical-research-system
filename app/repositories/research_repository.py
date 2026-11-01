@@ -18,9 +18,7 @@ class ResearchRepository:
         await self.db.refresh(research_job)
         return research_job
 
-    def get_by_id(self, research_id: int) :
+    async def get_by_id(self, research_id: int) :
         return (
-            self.db.query(ResearchJob)
-               .filter(ResearchJob.id == research_id)
-               .first()
+            await self.db.get(ResearchJob, research_id)
         )

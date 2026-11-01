@@ -30,12 +30,12 @@ async def create_research(request: ResearchRequest, db: AsyncSession = Depends(g
     )
 
 
-@router.get("/{research_id}")
-def get_research(research_id: UUID, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+@router.get("/{research_id}",response_model=ResearchStatusResponse, status_code=status.HTTP_200_OK)
+async def get_research(research_id: UUID, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """Get research status and progress."""
     service = ResearchService(db)
 
-    job = service.get_research(research_id)
+    job = await service.get_research(research_id)
 
     if not job:
         raise HTTPException(
@@ -53,7 +53,7 @@ def get_research(research_id: UUID, db: AsyncSession = Depends(get_db)) -> dict[
 
 
 @router.get("/{research_id}/tasks")
-def get_research_tasks(research_id: UUID) -> dict[str, Any]:
+async def get_research_tasks(research_id: UUID) -> dict[str, Any]:
     """Inspect task status and failures for a research job."""
 
     raise HTTPException(
@@ -63,7 +63,7 @@ def get_research_tasks(research_id: UUID) -> dict[str, Any]:
 
 
 @router.post("/{research_id}/cancel")
-def cancel_research(research_id: UUID) -> dict[str, Any]:
+async def cancel_research(research_id: UUID) -> dict[str, Any]:
     """Request cancellation of a research job."""
 
     raise HTTPException(
