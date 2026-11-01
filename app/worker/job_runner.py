@@ -6,6 +6,8 @@ from sqlalchemy import select, or_, func, text
 
 from app.db.models import ResearchJob
 from app.db.session import AsyncSessionLocal, get_db
+from app.ingestion.clients.sec_client import SECClient
+from app.ingestion.extractors.financial_extractor import FinancialExtractor
 
 # Implementating PostgresDB Backend Job Queue --> Using Postgres SKIP LOCKED Concept which
 # helps in achieving atomicity and concurrency control when multiple workers are trying to claim jobs from the queue.
@@ -59,12 +61,31 @@ async def process_job(research_id):
         async with AsyncSessionLocal() as db:
             # All the below lines of code are executed within single DB Async session .
             job = await db.get(ResearchJob, research_id)
+            sec = SECClient()
+            extractor = FinancialExtractor()
 
             if not job or job.status != 'running':
                 return 
             
             print(f"Processing job {research_id}...")
             #  Simulate research execution
+            user_question = job.request_payload.get("question");
+            print(f"Executing research for {user_question}...")
+
+            company_name = None;
+            
+            if "apple" in user_question.lower():
+                company_name = "apple"
+
+            # Fetch company facts from SEC API and extract financial data using the FinancialExtractor.
+            company_facts_results = await sec.get_company_facts(company_name)
+           
+            print(f"Fetched facts for {company_name}")
+           
+            extract_facts_results = extractor.extract(company_facts_results)
+           
+            print(f"Extracted facts for {company_name}: {extract_facts_results['operating_cash_flow']}")
+
             time.sleep(5)
 
             job.status = "completed"

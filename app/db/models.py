@@ -1,10 +1,11 @@
 """Database models."""
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -184,4 +185,43 @@ class TaskAttempt(Base):
     error_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     provider_usage: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB, nullable=True
+    )
+
+
+class Company(Base):
+    """A company being researched."""
+    __tablename__ = "companies"
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid4
+    )
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    ticker: Mapped[str] = mapped_column(String(20), nullable=False)
+    cik: Mapped[str] = mapped_column(String(20), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class FinancialFact(Base):
+    """An individual financial observation for a company."""
+    __tablename__ = "financial_facts"
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid4
+    )
+    company_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("companies.id"), nullable=False
+    )
+    metric: Mapped[str] = mapped_column(Text, nullable=False)
+    value: Mapped[Decimal] = mapped_column(
+        Numeric(precision=24, scale=6), nullable=False
+    )
+    unit: Mapped[str] = mapped_column(String(50), nullable=False)
+    period_start: Mapped[date] = mapped_column(Date, nullable=False)
+    period_end: Mapped[date] = mapped_column(Date, nullable=False)
+    fiscal_year: Mapped[int] = mapped_column(Integer, nullable=False)
+    filing_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    accession_number: Mapped[str] = mapped_column(String(40), nullable=False)
+    source_url: Mapped[str] = mapped_column(Text, nullable=False)
+    retrieved_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
