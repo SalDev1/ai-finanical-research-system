@@ -1,4 +1,4 @@
-"""Financial data extractor."""
+from datetime import date
 class FinancialExtractor:
     # Fetching financial metrics from the SEC company facts data using predefined tags.
     METRIC_TAGS = {
@@ -19,6 +19,14 @@ class FinancialExtractor:
         ]
     }
 
+    METRIC_TYPES = {
+        "revenue": "duration",
+        "net_income": "duration",
+        "operating_cash_flow": "duration",
+        "total_assets": "instant",
+        "total_liabilities": "instant",
+    }
+
     def extract(self, company_facts):
         # This func extracts all the financial metrics of the particular asked company.
         facts = company_facts["facts"]["us-gaap"]
@@ -30,3 +38,64 @@ class FinancialExtractor:
                     break
 
         return extracted
+
+    def normailze_finanical_facts(self, extracted_facts): 
+        # This func normalizes the extracted financial metrics into a structured format.
+        normalized_records = []
+        for metric, fact_data in extracted_facts.items():
+            period_type = self.METRIC_TYPES.get(metric)
+
+            if not period_type:
+                continue
+
+            unit = fact_data["units"]
+
+            for observation in fact_data["units"]['USD']:
+
+                # Only annual filings for our first version
+                if observation.get("form") != "10-K":
+                    continue
+
+                start = observation.get("start")
+                end = observation.get("end")
+
+                if not end:
+                    continue
+
+                # Duration metrics: approximately one fiscal year
+                if period_type == "duration":
+
+                    if not start:
+                        continue
+
+                    start_date = date.fromisoformat(start)
+                    end_date = date.fromisoformat(end)
+
+                    duration = (end_date - start_date).days
+
+                    if not 330 <= duration <= 380:
+                        continue
+
+                # Instant metrics: no start date
+                elif period_type == "instant":
+
+                    if start:
+                        continue
+
+                record = {
+                    "metric": metric,
+                    "value": observation["val"],
+                    "unit": 'USD',
+                    "period_type": period_type,
+                    "period_start":start,
+                    "period_end": end,
+                    "fiscal_year": observation.get("fy"),
+                    "fiscal_period": observation.get("fp"),
+                    "filing_type": observation.get("form"),
+                    "filing_date": observation.get("filed"),
+                    "accession_number": observation.get("accn"),
+                    "source": "SEC EDGAR",
+                }
+
+                normalized_records.append(record)
+        return normalized_records

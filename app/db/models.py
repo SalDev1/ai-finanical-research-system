@@ -216,12 +216,12 @@ class FinancialFact(Base):
         Numeric(precision=24, scale=6), nullable=False
     )
     unit: Mapped[str] = mapped_column(String(50), nullable=False)
+    period_type: Mapped[str] = mapped_column(String(20), nullable=False)
     period_start: Mapped[date] = mapped_column(Date, nullable=False)
     period_end: Mapped[date] = mapped_column(Date, nullable=False)
     fiscal_year: Mapped[int] = mapped_column(Integer, nullable=False)
     filing_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    fiscal_period: Mapped[str] = mapped_column(String(20), nullable=False)
     accession_number: Mapped[str] = mapped_column(String(40), nullable=False)
-    source_url: Mapped[str] = mapped_column(Text, nullable=False)
-    retrieved_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    filing_date: Mapped[date] = mapped_column(Date, nullable=False)
+    source: Mapped[str] = mapped_column(Text, nullable=False)

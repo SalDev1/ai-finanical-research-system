@@ -23,4 +23,8 @@ class SECClient:
         ) as client:
             response = await client.get(url)
             response.raise_for_status()
-            return response.json()
+            return {
+                "company_ticker": COMPANIES.get(cik, {}).get("ticker", "Unknown Ticker"),
+                "company_cik" : formatted_cik,
+                "company_facts": response.json()
+            }

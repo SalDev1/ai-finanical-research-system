@@ -1,6 +1,6 @@
 """Background job runner."""
 import time
-from datetime import timedelta
+from datetime import datetime
 
 from sqlalchemy import select, or_, func, text
 
@@ -8,6 +8,7 @@ from app.db.models import ResearchJob
 from app.db.session import AsyncSessionLocal, get_db
 from app.ingestion.clients.sec_client import SECClient
 from app.ingestion.extractors.financial_extractor import FinancialExtractor
+from app.services.company_service import CompanyService
 
 # Implementating PostgresDB Backend Job Queue --> Using Postgres SKIP LOCKED Concept which
 # helps in achieving atomicity and concurrency control when multiple workers are trying to claim jobs from the queue.
@@ -63,6 +64,7 @@ async def process_job(research_id):
             job = await db.get(ResearchJob, research_id)
             sec = SECClient()
             extractor = FinancialExtractor()
+            company_service = CompanyService(db)
 
             if not job or job.status != 'running':
                 return 
@@ -82,9 +84,25 @@ async def process_job(research_id):
            
             print(f"Fetched facts for {company_name}")
            
-            extract_facts_results = extractor.extract(company_facts_results)
+            extract_facts_results = extractor.extract(company_facts_results["company_facts"])
            
-            print(f"Extracted facts for {company_name}: {extract_facts_results['operating_cash_flow']}")
+            print(f"Extracted facts for {company_name}: {extract_facts_results['revenue']}")
+
+            normalized_financial_facts = extractor.normailze_finanical_facts(extract_facts_results);
+
+            print(f"Normalized financial facts for {company_name}: {len(normalized_financial_facts)}")
+
+            company_record = await company_service.create_company({"name": company_name, "ticker": company_facts_results["company_ticker"], "cik": company_facts_results["company_cik"], "created_at": datetime.now()})
+            normalized_financial_records = [];
+            # Attaching company_id to each financial record before storing them in the database as foreign key reference.
+            for record in normalized_financial_records : 
+                record["company_id"] = company_record.id
+
+            print(f"Saving {len(normalized_financial_facts)} financial records for company {company_name} to the database.")
+
+            print(f"Record type: {type(normalized_financial_facts)}")
+            print(f"First record type: {type(normalized_financial_facts[0]) if normalized_financial_facts else None}")
+            await company_service.save_financial_records(normalized_financial_facts)
 
             time.sleep(5)
 
