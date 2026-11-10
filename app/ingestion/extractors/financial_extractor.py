@@ -1,6 +1,10 @@
-from datetime import date
+from datetime import date, datetime
+
+from app.ingestion.validators.financial_validators import FinancialValidator
 class FinancialExtractor:
     # Fetching financial metrics from the SEC company facts data using predefined tags.
+    financial_validator = FinancialValidator()
+
     METRIC_TAGS = {
         "revenue": [
             "RevenueFromContractWithCustomerExcludingAssessedTax",
@@ -82,20 +86,27 @@ class FinancialExtractor:
                     if start:
                         continue
 
+                start_date = datetime.fromisoformat(start) if start else None
+                end_date = datetime.fromisoformat(end) if end else None
+                filling_date = datetime.fromisoformat(observation.get("filed")) if observation.get("filed") else None
+
                 record = {
                     "metric": metric,
                     "value": observation["val"],
                     "unit": 'USD',
                     "period_type": period_type,
-                    "period_start":start,
-                    "period_end": end,
+                    "period_start": start_date,
+                    "period_end": end_date,
                     "fiscal_year": observation.get("fy"),
                     "fiscal_period": observation.get("fp"),
                     "filing_type": observation.get("form"),
-                    "filing_date": observation.get("filed"),
+                    "filing_date": filling_date,
                     "accession_number": observation.get("accn"),
                     "source": "SEC EDGAR",
                 }
+
+                if not self.financial_validator.validate(record):
+                    continue
 
                 normalized_records.append(record)
         return normalized_records

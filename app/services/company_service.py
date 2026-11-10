@@ -10,7 +10,13 @@ class CompanyService:
 
     async def create_company(self, request : dict):
         print(f"Payload Dump : {request}")
-        company_record = await self.repository.create(request)
+        company_record_exists = await self.repository.get_company_by_name(request["name"])
+
+        if company_record_exists:
+            print(f"Company record already exists in DB : {company_record_exists.id} and name: {company_record_exists.name}")
+            return company_record_exists
+
+        company_record = await self.repository.create_company(request)
         print(f"Company record created in DB : {company_record.id} and name: {company_record.name}")
         return company_record
 

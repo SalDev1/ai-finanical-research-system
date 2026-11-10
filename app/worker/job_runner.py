@@ -93,9 +93,8 @@ async def process_job(research_id):
             print(f"Normalized financial facts for {company_name}: {len(normalized_financial_facts)}")
 
             company_record = await company_service.create_company({"name": company_name, "ticker": company_facts_results["company_ticker"], "cik": company_facts_results["company_cik"], "created_at": datetime.now()})
-            normalized_financial_records = [];
             # Attaching company_id to each financial record before storing them in the database as foreign key reference.
-            for record in normalized_financial_records : 
+            for record in normalized_financial_facts : 
                 record["company_id"] = company_record.id
 
             print(f"Saving {len(normalized_financial_facts)} financial records for company {company_name} to the database.")

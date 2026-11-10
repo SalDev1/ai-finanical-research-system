@@ -217,11 +217,22 @@ class FinancialFact(Base):
     )
     unit: Mapped[str] = mapped_column(String(50), nullable=False)
     period_type: Mapped[str] = mapped_column(String(20), nullable=False)
-    period_start: Mapped[date] = mapped_column(Date, nullable=False)
-    period_end: Mapped[date] = mapped_column(Date, nullable=False)
+    period_start: Mapped[date] = mapped_column(Date, nullable=True)
+    period_end: Mapped[date] = mapped_column(Date, nullable=True)
     fiscal_year: Mapped[int] = mapped_column(Integer, nullable=False)
     filing_type: Mapped[str] = mapped_column(String(20), nullable=False)
     fiscal_period: Mapped[str] = mapped_column(String(20), nullable=False)
     accession_number: Mapped[str] = mapped_column(String(40), nullable=False)
-    filing_date: Mapped[date] = mapped_column(Date, nullable=False)
+    filing_date: Mapped[date] = mapped_column(Date, nullable=True)
     source: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "company_id",
+            "metric",
+            "period_start",
+            "period_end",
+            "fiscal_year",
+            name="uq_financial_facts_unique_observation",
+        ),
+    )
