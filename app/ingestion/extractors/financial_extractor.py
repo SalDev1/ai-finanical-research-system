@@ -43,7 +43,16 @@ class FinancialExtractor:
 
         return extracted
 
-    def normailze_finanical_facts(self, extracted_facts): 
+    def building_sec_url(self, cik : str, accession_number : str) -> str:
+        cik = cik.lstrip("0")
+        accession_without_dashes = accession_number.replace("-", "")
+        return (
+            f"https://www.sec.gov/Archives/edgar/data/"
+            f"{cik}/{accession_without_dashes}/"
+            f"{accession_number}-index.htm"
+        )
+
+    def normailze_finanical_facts(self, extracted_facts, company_facts_results): 
         # This func normalizes the extracted financial metrics into a structured format.
         normalized_records = []
         for metric, fact_data in extracted_facts.items():
@@ -55,22 +64,16 @@ class FinancialExtractor:
             unit = fact_data["units"]
 
             for observation in fact_data["units"]['USD']:
-
-                # Only annual filings for our first version
-                if observation.get("form") != "10-K":
+                # Data Validation: Ensure that the observation has the required fields and valid data.
+                if not self.financial_validator.validate(observation):
+                    print(f"Invalid financial record: {observation}")
                     continue
 
                 start = observation.get("start")
                 end = observation.get("end")
 
-                if not end:
-                    continue
-
                 # Duration metrics: approximately one fiscal year
                 if period_type == "duration":
-
-                    if not start:
-                        continue
 
                     start_date = date.fromisoformat(start)
                     end_date = date.fromisoformat(end)
@@ -82,7 +85,6 @@ class FinancialExtractor:
 
                 # Instant metrics: no start date
                 elif period_type == "instant":
-
                     if start:
                         continue
 
@@ -103,10 +105,7 @@ class FinancialExtractor:
                     "filing_date": filling_date,
                     "accession_number": observation.get("accn"),
                     "source": "SEC EDGAR",
+                    "source_url": self.building_sec_url(company_facts_results["company_cik"], observation.get("accn"))
                 }
-
-                if not self.financial_validator.validate(record):
-                    continue
-
                 normalized_records.append(record)
         return normalized_records

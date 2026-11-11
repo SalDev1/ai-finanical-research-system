@@ -225,6 +225,7 @@ class FinancialFact(Base):
     accession_number: Mapped[str] = mapped_column(String(40), nullable=False)
     filing_date: Mapped[date] = mapped_column(Date, nullable=True)
     source: Mapped[str] = mapped_column(Text, nullable=False)
+    source_url: Mapped[str] = mapped_column(String(200), nullable=False)
 
     __table_args__ = (
         UniqueConstraint(

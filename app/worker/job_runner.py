@@ -81,18 +81,21 @@ async def process_job(research_id):
 
             # Fetch company facts from SEC API and extract financial data using the FinancialExtractor.
             company_facts_results = await sec.get_company_facts(company_name)
-           
+            job.status = "company_facts_fetched"
+            job.current_stage = "company_facts_fetched"
             print(f"Fetched facts for {company_name}")
            
             extract_facts_results = extractor.extract(company_facts_results["company_facts"])
-           
             print(f"Extracted facts for {company_name}: {extract_facts_results['revenue']}")
 
-            normalized_financial_facts = extractor.normailze_finanical_facts(extract_facts_results);
+            normalized_financial_facts = extractor.normailze_finanical_facts(extract_facts_results, company_facts_results);
+            job.status = "data_validation_completed"
+            job.current_stage = "data_validation_completed"
 
             print(f"Normalized financial facts for {company_name}: {len(normalized_financial_facts)}")
 
             company_record = await company_service.create_company({"name": company_name, "ticker": company_facts_results["company_ticker"], "cik": company_facts_results["company_cik"], "created_at": datetime.now()})
+
             # Attaching company_id to each financial record before storing them in the database as foreign key reference.
             for record in normalized_financial_facts : 
                 record["company_id"] = company_record.id
@@ -102,6 +105,9 @@ async def process_job(research_id):
             print(f"Record type: {type(normalized_financial_facts)}")
             print(f"First record type: {type(normalized_financial_facts[0]) if normalized_financial_facts else None}")
             await company_service.save_financial_records(normalized_financial_facts)
+
+            job.status = "data_ingestion_completed"
+            job.current_stage = "data_ingestion_completed"
 
             time.sleep(5)
 

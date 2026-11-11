@@ -1,16 +1,15 @@
 class FinancialValidator:
     def validate(self, fact: dict) -> bool:
-        if fact["value"] is None:
+        if fact.get('form') != "10-K": 
+            return False
+            
+        if fact.get("val") is None:
             return False
 
-        if not fact["unit"]:
+        if not fact.get("start"):
             return False
 
-        if not fact["period_end"]:
+        if not fact.get("end"):
             return False
-
-        if fact["period_type"] == "duration":
-            if not fact["period_start"]:
-                return False
 
         return True
