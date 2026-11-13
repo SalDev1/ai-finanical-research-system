@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import select, or_, func, text
 
+from app.analysis.financial_analysis import FinancialAnalysis
 from app.db.models import ResearchJob
 from app.db.session import AsyncSessionLocal, get_db
 from app.ingestion.clients.sec_client import SECClient
@@ -65,6 +66,7 @@ async def process_job(research_id):
             sec = SECClient()
             extractor = FinancialExtractor()
             company_service = CompanyService(db)
+            analyzer = FinancialAnalysis()
 
             if not job or job.status != 'running':
                 return 
@@ -104,12 +106,15 @@ async def process_job(research_id):
 
             print(f"Record type: {type(normalized_financial_facts)}")
             print(f"First record type: {type(normalized_financial_facts[0]) if normalized_financial_facts else None}")
-            await company_service.save_financial_records(normalized_financial_facts)
+            db_financial_records = await company_service.save_financial_records(normalized_financial_facts)
 
             job.status = "data_ingestion_completed"
             job.current_stage = "data_ingestion_completed"
 
             time.sleep(5)
+
+            # # Analyse financial data using the FinancialAnalysis class.
+            analyzer.analyze(normalized_financial_facts)
 
             job.status = "completed"
             job.current_stage = "completed"
