@@ -1,6 +1,6 @@
 """Financial analysis workflows."""
-from .financial_calculator import FinancialCalculator
 from .financial_metrics import FinancialMetric
+from app.tools.financial_calculator import FinancialCalculator
 
 
 class FinancialAnalysis:
