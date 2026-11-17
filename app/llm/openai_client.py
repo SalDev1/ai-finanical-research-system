@@ -1,4 +1,4 @@
-from app.llm.base import LLMClient 
+from app.llm.llm_client import LLMClient 
 
 class OpenAIClient(LLMClient):
 

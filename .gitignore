@@ -1,5 +1,7 @@
 .venv/
+.venv-gptoss
 __pycache__/
 .pytest_cache/
 .env
 alembic/versions
+model_offload
