@@ -80,6 +80,7 @@ class ResearchJob(Base):
         Text,
         nullable=True
     )
+    research_plan : Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=True)
 
 
 class ResearchTasks(Base):

@@ -2,6 +2,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import ResearchJob
 from datetime import datetime, timezone, timedelta
+from uuid import UUID
 
 class ResearchRepository: 
 
@@ -12,13 +13,16 @@ class ResearchRepository:
         """Create a new research job."""
 
         print(f"Payload received in repository: {payload}")
+
+        # Also saving research job over here.
+
         research_job = ResearchJob(request_payload=payload, status="queued", current_stage= "received", plan_version=1, iteration_count=0, budget_limit=1000.00, budget_used=0.00, deadline_at=datetime.now(timezone.utc) + timedelta(hours=1))
         self.db.add(research_job)
         await self.db.commit()
         await self.db.refresh(research_job)
         return research_job
 
-    async def get_by_id(self, research_id: int) :
+    async def get_by_id(self, research_id: UUID) :
         return (
             await self.db.get(ResearchJob, research_id)
         )

@@ -9,7 +9,7 @@ import torch
 
 class HuggingFaceLLMClient(LLMClient):
 
-    def __init__(self,model_id: str = "Qwen/Qwen2.5-3B-Instruct"):
+    def __init__(self,model_id: str = "Qwen/Qwen2.5-1.5B-Instruct"):
         self.model_id = model_id
         print("Loading tokenizer...")
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
@@ -18,13 +18,14 @@ class HuggingFaceLLMClient(LLMClient):
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
         )
 
         print("Loading model...")
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_id,
             quantization_config=quantization_config,
-            device_map="auto",
+            device_map={"": 0},
         )
         print("Model Downloaded")
 

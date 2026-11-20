@@ -10,6 +10,7 @@ from app.db.session import AsyncSessionLocal, get_db
 from app.ingestion.clients.sec_client import SECClient
 from app.ingestion.extractors.financial_extractor import FinancialExtractor
 from app.services.company_service import CompanyService
+from app.services.research_service import ResearchService
 
 # Implementating PostgresDB Backend Job Queue --> Using Postgres SKIP LOCKED Concept which
 # helps in achieving atomicity and concurrency control when multiple workers are trying to claim jobs from the queue.
@@ -67,6 +68,7 @@ async def process_job(research_id):
             extractor = FinancialExtractor()
             company_service = CompanyService(db)
             analyzer = FinancialAnalysis()
+            research_service = ResearchService()
 
             if not job or job.status != 'running':
                 return 
@@ -75,6 +77,13 @@ async def process_job(research_id):
             #  Simulate research execution
             user_question = job.request_payload.get("question");
             print(f"Executing research for {user_question}...")
+
+            # Generate Research Plan using QWEN LLM Model
+            generated_research_plan = research_service.execute_research_plan(user_question)
+            print(f"Generating research plan for {user_question}... , {generated_research_plan}")
+
+            job.status = "research_plan_generated"
+            job.research_plan = generated_research_plan
 
             company_name = None;
             
