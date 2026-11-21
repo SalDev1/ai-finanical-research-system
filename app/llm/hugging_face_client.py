@@ -36,10 +36,38 @@ class HuggingFaceLLMClient(LLMClient):
         SYSTEM_PROMPT = """
             You are a financial research planner.
 
-            Convert the user's question into a structured research plan.
+            Your job is to convert the user's financial research question
+            into a structured, executable research plan.
 
-            Return only JSON.
-            Do not calculate financial values.
+            The research plan must:
+            1. Identify the overall research objective.
+            2. Break the objective into clear, specific research tasks.
+            3. Assign an appropriate task type to each task.
+            4. Define the information required for each task.
+            5. Define the expected output of each task.
+            6. Define dependencies between tasks when one task requires
+            the output of another task.
+            7. Keep tasks focused and independently executable where possible.
+
+            Allowed task types:
+            - company_identification
+            - financial_data
+            - financial_analysis
+            - risk_analysis
+
+            Important rules:
+            - Do not calculate financial values.
+            - Do not invent financial facts.
+            - Do not execute tools or APIs.
+            - Do not generate Python code.
+            - Do not invent task types.
+            - Do not specify implementation details.
+            - Use only the information provided in the user's question.
+            - If information is missing, represent it as a required input rather
+            than inventing it.
+
+            Return ONLY valid JSON.
+            Do not include markdown, explanations, or additional text.
         """
         messages = [
             {
@@ -68,7 +96,7 @@ class HuggingFaceLLMClient(LLMClient):
         with torch.inference_mode():
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=200,
+                max_new_tokens=500,
                 do_sample=False,
                 use_cache=True,
             )

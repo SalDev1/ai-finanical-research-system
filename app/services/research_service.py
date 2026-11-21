@@ -6,7 +6,6 @@ from app.repositories.research_repository import (
 )
 from app.llm.hugging_face_client import HuggingFaceLLMClient
 from app.services.research_planner import ResearchPlanner
-from uuid import UUID
 
 llm_huggingface_client = HuggingFaceLLMClient()
 planner = ResearchPlanner(llm_huggingface_client)
