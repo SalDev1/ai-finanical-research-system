@@ -68,7 +68,7 @@ async def process_job(research_id):
             extractor = FinancialExtractor()
             company_service = CompanyService(db)
             analyzer = FinancialAnalysis()
-            research_service = ResearchService()
+            research_service = ResearchService(db)
 
             if not job or job.status != 'running':
                 return 

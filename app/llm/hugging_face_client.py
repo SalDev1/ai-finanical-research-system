@@ -1,4 +1,3 @@
-from transformers import pipeline
 from app.llm.llm_client import LLMClient
 from transformers import (
     AutoModelForCausalLM,
@@ -8,25 +7,26 @@ from transformers import (
 import torch
 
 class HuggingFaceLLMClient(LLMClient):
-
-    def __init__(self,model_id: str = "Qwen/Qwen2.5-1.5B-Instruct"):
+    def __init__(self, model_id: str = "Qwen/Qwen2.5-1.5B-Instruct"):
         self.model_id = model_id
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         print("Loading tokenizer...")
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
 
-        quantization_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True,
-        )
+        # quantization_config = BitsAndBytesConfig(
+        #     load_in_4bit=True,
+        #     bnb_4bit_quant_type="nf4",
+        #     bnb_4bit_compute_dtype=torch.float16,
+        #     bnb_4bit_use_double_quant=True,
+        # )
 
         print("Loading model...")
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_id,
-            quantization_config=quantization_config,
-            device_map={"": 0},
-        )
+            # quantization_config=quantization_config,
+        ).to(self.device)
+
+        print(f"Using device: {self.device}")
         print("Model Downloaded")
 
     async def generate_research_plan(
