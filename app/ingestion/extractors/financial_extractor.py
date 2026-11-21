@@ -66,7 +66,7 @@ class FinancialExtractor:
             for observation in fact_data["units"]['USD']:
                 # Data Validation: Ensure that the observation has the required fields and valid data.
                 if not self.financial_validator.validate(observation):
-                    print(f"Invalid financial record: {observation}")
+                    # print(f"Invalid financial record: {observation}")
                     continue
 
                 start = observation.get("start")

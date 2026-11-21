@@ -34,4 +34,4 @@ class ResearchService:
     async def execute_research_plan(self , question : str):
         # Generate Research Plan 
         plan = await planner.create_plan(question)
-        return plan.model_dump(mode="json")
+        return plan

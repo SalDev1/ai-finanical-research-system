@@ -79,7 +79,7 @@ async def process_job(research_id):
             print(f"Executing research for {user_question}...")
 
             # Generate Research Plan using QWEN LLM Model
-            generated_research_plan = research_service.execute_research_plan(user_question)
+            generated_research_plan = await research_service.execute_research_plan(user_question)
             print(f"Generating research plan for {user_question}... , {generated_research_plan}")
 
             job.status = "research_plan_generated"

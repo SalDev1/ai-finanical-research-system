@@ -41,7 +41,6 @@ class HuggingFaceLLMClient(LLMClient):
             Return only JSON.
             Do not calculate financial values.
         """
-
         messages = [
             {
                 "role": "system",
