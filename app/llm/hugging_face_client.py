@@ -105,7 +105,4 @@ class HuggingFaceLLMClient(LLMClient):
             outputs[0][inputs["input_ids"].shape[-1]:],
             skip_special_tokens=True,
         )
-        return {
-            "question": question,
-            "response": response
-        }
+        return { "question" : question, "response" : response }
