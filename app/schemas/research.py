@@ -33,13 +33,13 @@ class TaskType(str, Enum):
 
 class ResearchTask(BaseModel):
    task_id : str
-   task_type : Literal["company_identification","financial_data","finanical_analysis","risk_analysis"]
+   task_type : TaskType
    objective : str
    inputs : dict
-   expected_output : list[str]
+   expected_output : list[str] | None = None
    depends_on : list[str] = []
-   required : bool = True
-   llm_config: LLMConfig | None = None  
+#    required : bool = True
+#    llm_config: LLMConfig | None = None  
 
 class ResearchTaskPlan(BaseModel):
     research_objective: str
