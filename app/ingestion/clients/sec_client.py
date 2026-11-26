@@ -10,6 +10,7 @@ class SECClient:
 
     async def get_company_facts(self, cik: str):
         get_company_cik = COMPANIES.get(cik, {}).get("cik", "Unknown CIK")
+        print(f"Getting company_cik details ===" , get_company_cik)
         formatted_cik = str(get_company_cik).zfill(10)
 
         url = (

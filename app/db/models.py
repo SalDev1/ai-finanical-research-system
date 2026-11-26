@@ -101,39 +101,6 @@ class ResearchTasks(Base):
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_code: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-
-class EvidenceRecord(Base):
-    """Evidence discovered during a research job or task."""
-
-    __tablename__ = "evidence_records"
-
-    id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid4
-    )
-    research_id: Mapped[UUID] = mapped_column(
-        Uuid(as_uuid=True), ForeignKey("research_jobs.id"), nullable=False
-    )
-    research_task_id: Mapped[UUID | None] = mapped_column(
-        Uuid(as_uuid=True), ForeignKey("research_tasks.id"), nullable=True
-    )
-    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    source_title: Mapped[str] = mapped_column(Text, nullable=False)
-    publisher: Mapped[str | None] = mapped_column(Text, nullable=True)
-    published_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    retrieved_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
-    locator: Mapped[str | None] = mapped_column(Text, nullable=True)
-    content_excerpt: Mapped[str] = mapped_column(Text, nullable=False)
-    evidence_type: Mapped[str] = mapped_column(Text, nullable=False)
-    record_metadata: Mapped[dict[str, Any]] = mapped_column(
-        "metadata", JSONB, nullable=False
-    )
-    content_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
-
-
 class ResearchReport(Base):
     """A versioned research report and its delivery state."""
 
@@ -238,3 +205,34 @@ class FinancialFact(Base):
             name="uq_financial_facts_unique_observation",
         ),
     )
+
+class Source(Base):
+    # Defining a evidence source for matching defined claims and calculations.
+    __tablename__ = "sources"
+    id : Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid4
+    )
+    title :  Mapped[str] = mapped_column(Text, nullable=False)
+    publisher:  Mapped[str] = mapped_column(Text, nullable=False)
+    url : Mapped[str] = mapped_column(Text, nullable=False)
+    source_type : Mapped[str] = mapped_column(Text, nullable=False)
+    publication_date : Mapped[date] = mapped_column(Date, nullable=True)
+    retrieved_at : Mapped[date] = mapped_column(Date, nullable=True)
+    content_hash : Mapped[str] = mapped_column(Text, nullable=False)
+
+class EvidenceRecord(Base):
+    """Evidence discovered during a research job or task."""
+    __tablename__ = "evidence_records"
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid4
+    )
+    research_job_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("research_jobs.id"), nullable=False
+    )
+    source_id : Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("sources.id"), nullable=False
+    ) 
+    content :  Mapped[str] = mapped_column(String, nullable=False)
+    evidence_type :  Mapped[str] = mapped_column(String, nullable=False)
+    locator :  Mapped[str] = mapped_column(String, nullable=False)
+    retrieved_at : Mapped[date] = mapped_column(Date, nullable=False)

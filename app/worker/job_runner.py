@@ -89,6 +89,8 @@ async def process_job(research_id):
             
             if "apple" in user_question.lower():
                 company_name = "apple"
+            if "microsoft" in user_question.lower():
+                company_name = "microsoft"
 
             # Fetch company facts from SEC API and extract financial data using the FinancialExtractor.
             company_facts_results = await sec.get_company_facts(company_name)
